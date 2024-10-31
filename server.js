@@ -46,6 +46,38 @@ app.post('/ajouter-task', (req, res) => {
     });
 });
 
+
+// Function to delete a task
+app.delete('/supprimer-task/:title', (req, res) => {
+    const taskTitle = req.params.title;
+
+    // Read the existing tasks from the JSON file
+    fs.readFile('task.json', (err, data) => {
+        if (err) {
+            return res.status(500).send('Erreur de lecture du fichier');
+        }
+
+        let tasks;
+        try {
+            tasks = JSON.parse(data).tasks; // Use 'tasks' instead of 'contacts'
+        } catch (error) {
+            return res.status(500).send('Erreur lors de la lecture des tâches');
+        }
+
+        // Filter out the task with the specified title
+        tasks = tasks.filter(task => task.title !== taskTitle);
+
+        // Write the updated tasks back to the JSON file
+        fs.writeFile('task.json', JSON.stringify({ tasks }, null, 2), (err) => {
+            if (err) {
+                return res.status(500).send('Erreur d\'écriture dans le fichier');
+            }
+            res.status(200).send('Tâche supprimée');
+        });
+    });
+});
+
+
 //fonction pour assurer l'écoute des requêtes par le serveur
 app.listen(PORT, () => {
     console.log('Serveur en cours d"exécution sut http://localhost:${PORT}')

@@ -38,7 +38,7 @@ function AfficherMenu() {
     const buttonDetails = [
         { text: "Ajouter", id: "btn1" },
         { text: "Afficher", id: "btn2" },
-        { text: "JSP", id: "btn3" }
+        { text: "Calendrier", id: "btn3" }
     ];
 
     buttonDetails.forEach(detail => {
@@ -54,23 +54,23 @@ function AfficherMenu() {
 }
 
 function loadPage(pageId) {
-    const contentDiv = document.getElementById("content");
-    contentDiv.innerHTML = "";
-    let content;
+    const formTask = document.getElementById("taskForm");
+    const taskList = document.getElementById("taskList");
+    const contentDiv = document.getElementById("menuGestionnaire");
+    taskList.innerHTML = ""; // Réinitialiser la liste des tâches
+
     switch (pageId) {
         case "btn1":
-            content = "<h2>Ajouter une tâche</h2><p>form d'ajout.</p>";
+            formTask.style.display = "block";
             break;
         case "btn2":
-            content = "<h2>Afficher mes tâches</h2><p>calendrier avec les taches et un select pour les diff options de tri.</p>";
+            formTask.style.display = "none";
+            showAllTasks();
             break;
         case "btn3":
-            content = "<h2>Aucune idée</h2><p>à voir.</p>";
+            formTask.style.display = "none";
+            showCalendar();
             break;
-        default:
-            content = "<h2>Welcome</h2><p>Select a page to view its content.</p>";
     }
-
-    contentDiv.innerHTML = content;
-    contentDiv.style.display = "block";
 }
+

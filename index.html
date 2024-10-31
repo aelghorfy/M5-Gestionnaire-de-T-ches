@@ -1,23 +1,42 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DYNATASK</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <div id="iconLancement" style="text-align: center;">
-            <img src="/images/dynatask.PNG" alt="Lancer gestionnaire" style="cursor: pointer;">
-        </div>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynaTask</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+    <div id="content">
+        <img id="iconLancement" src="dynatask.png" alt="DynaTask" style="cursor: pointer;">
+    </div>
 
-        <div id="menuGestionnaire" style="display: none;"></div>
-        <div id="content" style="display: none;"></div>
+    <div id="menuGestionnaire" style="display: none;"></div>
 
-     
-        
-        <script src="index.js" async defer></script>
-    </body>
+    <form id="taskForm" style="display: none;">
+        <label for="title">Titre:</label>
+        <input type="text" id="title" name="title" required><br><br>
+
+        <label for="dueDate">Date d'échéance:</label>
+        <input type="date" id="dueDate" name="dueDate" required>
+
+        <label for="dueTime">à :</label>
+        <input type="time" id="dueTime" name="dueTime" required><br><br>
+
+        <label for="urgent">Urgent:</label>
+        <input type="checkbox" id="urgent" name="urgent"><br><br>
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required><br><br>
+
+        <label for="color">Couleur:</label>
+        <input type="color" id="color" name="color"><br><br>
+
+        <button type="submit" id="submitTaskBtn">Ajouter</button>
+    </form>
+
+    <div id="taskList"></div>
+
+    <script src="index.js"></script>
+</body>
 </html>
