@@ -74,3 +74,29 @@ function loadPage(pageId) {
     }
 }
 
+document.getElementById('taskForm').addEventListener('submit', (e) => {
+    e.preventDefault(); // Empêche la soumission du formulaire
+
+    const title = document.getElementById('title').value;
+    const dueDate = document.getElementById('dueDate').value;
+    const dueTime = document.getElementById('dueTime').value;
+    const urgent = document.getElementById('urgent').checked;
+    const description = document.getElementById('description').value;
+    const color = document.getElementById('color').value;
+
+    if (title && dueDate && dueTime && description) {
+        const task = {
+            title,
+            dueDate,
+            dueTime,
+            urgent,
+            description,
+            color
+        };
+        addTaskToDOM(task);
+        tasks.push(task); // Ajouter la tâche à la liste
+        document.getElementById('taskForm').reset();
+        document.getElementById('taskForm').style.display = 'none'; // Masquer le formulaire
+    }
+});
+
