@@ -100,3 +100,48 @@ document.getElementById('taskForm').addEventListener('submit', (e) => {
     }
 });
 
+function addTaskToDOM(task) {
+    const taskList = document.getElementById('taskList');
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task';
+    taskDiv.style.backgroundColor = task.color;
+    taskDiv.innerHTML = `
+        <h3>${task.title}</h3>
+        <p>Description: ${task.description}</p>
+        <p>Date d'échéance: ${task.dueDate} à ${task.dueTime}</p>
+        <p style="color: ${task.urgent ? 'red' : 'black'};">Urgent: ${task.urgent ? 'Oui' : 'Non'}</p>
+        <button onclick="editTask(this)">Modifier</button>
+        <button onclick="deleteTask(this)">Supprimer</button>
+    `;
+    taskList.appendChild(taskDiv);
+}
+
+function editTask(button) {
+    // Logique pour modifier la tâche (non implémentée ici)
+    alert("Modifier la tâche (fonctionnalité à implémenter)");
+}
+
+function deleteTask(button) {
+    const taskDiv = button.parentElement;
+    taskDiv.remove();
+}
+
+function showAllTasks() {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = ''; // Réinitialiser la liste des tâches
+    tasks.forEach(task => addTaskToDOM(task));
+}
+
+function showCalendar() {
+    // Logique pour afficher le calendrier (non implémentée ici)
+    alert("Afficher le calendrier (fonctionnalité à implémenter)");
+}
+
+// Afficher toutes les tâches
+document.getElementById('showAllTasksBtn').addEventListener('click', showAllTasks);
+
+// Afficher le calendrier
+document.getElementById('showCalendarBtn').addEventListener('click', showCalendar);
+
+// Chargement initial des tâches à partir de JSON
+// myJson('task.json'); // Décommenter si le fichier task.json est présent
