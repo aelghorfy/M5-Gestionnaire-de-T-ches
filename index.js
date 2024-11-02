@@ -106,7 +106,8 @@ function displayTaskForm() {
             dueTime: document.getElementById("dueTime").value,
             urgent: document.getElementById("urgent").checked,
             description: document.getElementById("description").value,
-            color: document.getElementById("color").value
+            color: document.getElementById("color").value,
+            completed: false // Ajouter un statut de complétion
         });
     });
 
@@ -140,6 +141,7 @@ function submitTask(task) {
 }
 
 // Fonction pour afficher chaque tâche dans la liste
+// Fonction pour afficher chaque tâche dans la liste
 function addTaskToDOM(task) {
     const contentDiv = document.getElementById("content");
     let taskList = document.getElementById("taskList");
@@ -154,6 +156,8 @@ function addTaskToDOM(task) {
     taskDiv.className = "task";
     taskDiv.style.backgroundColor = task.color;
     taskDiv.innerHTML = `
+        <input type="checkbox" class="taskCheckbox" ${task.completed ? 'checked' : ''} onchange="toggleTaskCompletion(${tasks.indexOf(task)})">
+        <label>Tâche terminée</label> <!-- Ajouter une étiquette ici -->
         <h3>${task.title}</h3>
         <p>Description : ${task.description}</p>
         <p>Date d'échéance : ${task.dueDate} à ${task.dueTime}</p>
@@ -161,6 +165,7 @@ function addTaskToDOM(task) {
     `;
     taskList.appendChild(taskDiv);
 }
+
 
 // Fonction pour afficher les tâches existantes
 function listTasks() {
@@ -178,9 +183,92 @@ function listTasks() {
     } else {
         // Parcourir le tableau des tâches et ajouter chaque tâche à l'interface
         tasks.forEach(task => addTaskToDOM(task));
+        
+        // Ajouter le select pour filtrer les tâches par statut
+        const statusSelect = document.createElement("select");
+        statusSelect.id = "statusSelect";
+        statusSelect.addEventListener("change", () => {
+            const selectedValue = statusSelect.value;
+            filterTasksByStatus(selectedValue);
+        });
+
+        const statusOptions = [
+            { value: "", text: "Tous" },
+            { value: "active", text: "Actives" },
+            { value: "completed", text: "Terminées" },
+        ];
+
+        statusOptions.forEach(optionInfo => {
+            const option = document.createElement("option");
+            option.value = optionInfo.value;
+            option.textContent = optionInfo.text;
+            statusSelect.appendChild(option);
+        });
+
+        contentDiv.appendChild(statusSelect); // Ajouter le select pour le statut
+
+        // Ajouter le select pour filtrer par date d'échéance
+        const dateSelect = document.createElement("select");
+        dateSelect.id = "dateSelect";
+        dateSelect.addEventListener("change", () => {
+            const selectedValue = dateSelect.value;
+            filterTasksByDueDate(selectedValue);
+        });
+
+        const dateOptions = [
+            { value: "", text: "Toutes les dates" },
+            { value: "overdue", text: "Échéances passées" },
+            { value: "upcoming", text: "À venir" },
+        ];
+
+        dateOptions.forEach(optionInfo => {
+            const option = document.createElement("option");
+            option.value = optionInfo.value;
+            option.textContent = optionInfo.text;
+            dateSelect.appendChild(option);
+        });
+
+        contentDiv.appendChild(dateSelect); // Ajouter le select pour la date
     }
 
     contentDiv.appendChild(taskList); // Ajouter la liste des tâches à contentDiv
+}
+
+// Fonction pour filtrer les tâches par statut
+function filterTasksByStatus(status) {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = ""; // Effacer la liste actuelle
+
+    const filteredTasks = tasks.filter(task => {
+        if (status === "") return true; // Tous les statuts
+        if (status === "active") return !task.completed; // Tâches actives
+        if (status === "completed") return task.completed; // Tâches terminées
+    });
+
+    filteredTasks.forEach(task => addTaskToDOM(task)); // Afficher les tâches filtrées
+}
+
+// Fonction pour filtrer les tâches par date d'échéance
+function filterTasksByDueDate(criteria) {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = ""; // Effacer la liste actuelle
+
+    const today = new Date();
+
+    const filteredTasks = tasks.filter(task => {
+        const dueDate = new Date(task.dueDate);
+        if (criteria === "") return true; // Toutes les dates
+        if (criteria === "overdue") return dueDate < today; // Échéances passées
+        if (criteria === "upcoming") return dueDate >= today; // À venir
+    });
+
+    filteredTasks.forEach(task => addTaskToDOM(task)); // Afficher les tâches filtrées
+}
+
+// Fonction pour basculer le statut de complétion d'une tâche
+function toggleTaskCompletion(taskIndex) {
+    tasks[taskIndex].completed = !tasks[taskIndex].completed; // Inverser le statut de la tâche
+    console.log("Statut de la tâche modifié :", tasks[taskIndex]);
 }
 
 // Initialisation
