@@ -4,39 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DynaTask</title>
-    <link rel="stylesheet" href="">
 </head>
 <body>
     <div id="content">
         <img id="iconLancement" src="dynatask.png" alt="DynaTask" style="cursor: pointer;">
     </div>
-
     <div id="menuGestionnaire" style="display: none;"></div>
-
-    <form id="taskForm" style="display: none;">
-        <label for="title">Titre:</label>
-        <input type="text" id="title" name="title" required><br><br>
-
-        <label for="dueDate">Date d'échéance:</label>
-        <input type="date" id="dueDate" name="dueDate" required>
-
-        <label for="dueTime">à :</label>
-        <input type="time" id="dueTime" name="dueTime" required><br><br>
-
-        <label for="urgent">Urgent:</label>
-        <input type="checkbox" id="urgent" name="urgent"><br><br>
-
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description" required><br><br>
-
-        <label for="color">Couleur:</label>
-        <input type="color" id="color" name="color"><br><br>
-
-        <button type="submit" id="submitTaskBtn">Ajouter</button>
-    </form>
-
-    <div id="taskList"></div>
-
     <script src="index.js"></script>
 </body>
 </html>
