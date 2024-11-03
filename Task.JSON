@@ -1,3 +1,13 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "title": "test ajout",
+      "dueDate": "2024-11-03",
+      "dueTime": "12:34",
+      "urgent": false,
+      "description": "tester si tt fonctionne",
+      "color": "#fdb4b4",
+      "completed": false
+    }
+  ]
 }

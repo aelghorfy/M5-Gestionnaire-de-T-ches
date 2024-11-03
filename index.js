@@ -35,8 +35,8 @@ function showMenu() {
     menuDiv.appendChild(title);
 
     const buttons = [
-        { text: "Ajouter", id: "btn1" },
-        { text: "Afficher", id: "btn2" },
+        { text: "Ajouter", id: "btnAjouter" },
+        { text: "Afficher", id: "btnAfficher" },
     ];
 
     buttons.forEach(buttonInfo => {
@@ -55,10 +55,10 @@ function loadPage(pageId) {
     contentDiv.innerHTML = ""; 
 
     switch (pageId) {
-        case "btn1":
+        case "btnAjouter":
             displayTaskForm();
             break;
-        case "btn2":
+        case "btnAfficher":
             listTasks();
             break;
     }
@@ -73,7 +73,7 @@ function displayTaskForm() {
     const fields = [
         { label: "Titre", id: "title", type: "text" },
         { label: "Date d'échéance", id: "dueDate", type: "date" },
-        { label: "à", id: "dueTime", type: "time" },
+        { label: "À", id: "dueTime", type: "time" },
         { label: "Urgent", id: "urgent", type: "checkbox" },
         { label: "Description", id: "description", type: "text" },
         { label: "Couleur", id: "color", type: "color" }
@@ -125,10 +125,10 @@ function submitTask(task) {
         if (!response.ok) {
             throw new Error(`Erreur : ${response.statusText}`);
         }
-        return response.text();
+        return response.json();
     })
     .then(data => {
-        alert(data);
+        alert(data.message);
         document.getElementById("taskForm").reset();
         tasks.push(task); 
         addTaskToDOM(task); 
@@ -175,7 +175,7 @@ function deleteTask(task) {
     const taskIndex = tasks.indexOf(task);
     if (taskIndex > -1) {
         tasks.splice(taskIndex, 1); 
-        fetch(`http://localhost:3001/supprimer-task`, {
+        fetch('http://localhost:3001/supprimer-task', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title: task.title })
@@ -192,20 +192,154 @@ function deleteTask(task) {
     }
 }
 
-// Fonction pour afficher toutes les tâches
+// Fonction pour lister les tâches
 function listTasks() {
     const contentDiv = document.getElementById("content");
     contentDiv.innerHTML = ""; // Vider le contenu précédent
 
-    const taskList = document.createElement("div");
-    taskList.id = "taskList";
+    fetch('task.json') 
+        .then(response => response.json())
+        .then(data => {
+            data.tasks.forEach(task => {
+                const taskDiv = document.createElement("div");
+                taskDiv.className = "task";
+                taskDiv.style.backgroundColor = task.color; // Appliquer la couleur de fond
 
-    // Afficher toutes les tâches
-    tasks.forEach(task => addTaskToDOM(task));
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = task.completed; // Vérifier si la tâche est terminée
+                checkbox.className = "taskCheckbox";
+                checkbox.addEventListener("change", () => {
+                    task.completed = checkbox.checked; // Mettre à jour l'état de la tâche
+                    toggleTaskCompletion(task); // Fonction à définir pour gérer la logique de complétion
+                });
 
-    contentDiv.appendChild(taskList);
+                const taskTitle = document.createElement("h3");
+                taskTitle.textContent = task.title;
+
+                const taskDetails = document.createElement("p");
+                taskDetails.textContent = `Échéance: ${task.dueDate} ${task.dueTime} | Urgent: ${task.urgent ? 'Oui' : 'Non'}`;
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Supprimer";
+                deleteButton.addEventListener("click", () => deleteTask(task)); // Appeler la fonction pour supprimer
+
+                const editButton = document.createElement("button");
+                editButton.textContent = "Modifier";
+                editButton.addEventListener("click", () => displayEditTaskForm(task));
+
+                taskDiv.appendChild(checkbox);
+                taskDiv.appendChild(taskTitle);
+                taskDiv.appendChild(taskDetails);
+                taskDiv.appendChild(deleteButton);
+                taskDiv.appendChild(editButton);
+                contentDiv.appendChild(taskDiv);
+            });
+        })
+        .catch(error => {
+            console.error("Erreur lors de la récupération des tâches :", error);
+        });
 }
 
-// Initialisation
+
+// Fonction pour afficher le formulaire de modification d'une tâche
+function displayEditTaskForm(task) {
+    const contentDiv = document.getElementById("content");
+    const form = document.createElement("form");
+    form.id = "editTaskForm";
+
+    const fields = [
+        { label: "Titre", id: "editTitle", type: "text", value: task.title },
+        { label: "Date d'échéance", id: "editDueDate", type: "date", value: task.dueDate },
+        { label: "À", id: "editDueTime", type: "time", value: task.dueTime },
+        { label: "Urgent", id: "editUrgent", type: "checkbox", checked: task.urgent },
+        { label: "Description", id: "editDescription", type: "text", value: task.description },
+        { label: "Couleur", id: "editColor", type: "color", value: task.color }
+    ];
+
+    fields.forEach(field => {
+        const label = document.createElement("label");
+        label.htmlFor = field.id;
+        label.textContent = field.label;
+
+        const input = document.createElement("input");
+        input.id = field.id;
+        input.type = field.type;
+        input.value = field.value || "";
+
+        if (field.type === "checkbox") {
+            input.checked = field.checked;
+        }
+
+        form.appendChild(label);
+        form.appendChild(input);
+        form.appendChild(document.createElement("br"));
+    });
+
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Modifier";
+    submitButton.type = "submit";
+    form.appendChild(submitButton);
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const updatedTask = {
+            title: document.getElementById("editTitle").value,
+            dueDate: document.getElementById("editDueDate").value,
+            dueTime: document.getElementById("editDueTime").value,
+            urgent: document.getElementById("editUrgent").checked,
+            description: document.getElementById("editDescription").value,
+            color: document.getElementById("editColor").value,
+        };
+        updateTask(task.title, updatedTask);
+    });
+
+    contentDiv.innerHTML = ""; 
+    contentDiv.appendChild(form);
+}
+
+// Fonction pour mettre à jour une tâche
+function updateTask(oldTitle, updatedTask) {
+    fetch('http://localhost:3001/modifier-task', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldTitle, updatedTask })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erreur : ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        listTasks(); 
+    })
+    .catch(error => {
+        console.error("Erreur lors de la mise à jour :", error);
+    });
+}
+
+function toggleTaskCompletion(task) {
+    fetch('http://localhost:3001/update-task', {
+        method: 'PUT', // Utilisation de PUT pour mettre à jour
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: task.title, completed: task.completed })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Erreur lors de la mise à jour de la tâche");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message); // Message de succès
+    })
+    .catch(error => {
+        console.error("Erreur lors de la mise à jour :", error);
+    });
+}
+
+// Appel de la fonction pour initialiser
 initializeLogo();
 fetchTasks('task.json'); 
