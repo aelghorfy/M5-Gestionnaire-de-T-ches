@@ -65,7 +65,7 @@ app.delete('/supprimer-task', (req, res) => {
 
 // Route pour modifier une tâche (changée en /update-task)
 app.put('/update-task', (req, res) => {
-    const { oldTitle, updatedTask } = req.body;
+    const { title, completed } = req.body;
 
     fs.readFile('task.json', (err, data) => {
         if (err) {
@@ -80,19 +80,19 @@ app.put('/update-task', (req, res) => {
         }
 
         // Trouver l'index de la tâche à modifier
-        const taskIndex = tasks.findIndex(task => task.title === oldTitle);
+        const taskIndex = tasks.findIndex(task => task.title === title);
         if (taskIndex === -1) {
             return res.status(404).json({ error: "Tâche non trouvée" });
         }
 
         // Mettre à jour la tâche
-        tasks[taskIndex] = { ...tasks[taskIndex], ...updatedTask };
+        tasks[taskIndex].completed = completed;
 
         fs.writeFile('task.json', JSON.stringify({ tasks }, null, 2), (err) => {
             if (err) {
                 return res.status(500).json({ error: 'Erreur d\'écriture dans le fichier' });
             }
-            res.status(200).json({ message: 'Tâche modifiée avec succès' });
+            res.status(200).json({ message: 'Tâche mise à jour avec succès' });
         });
     });
 });

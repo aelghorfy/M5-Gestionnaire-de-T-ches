@@ -7,7 +7,7 @@
       "urgent": false,
       "description": "tester si tt fonctionne",
       "color": "#fdb4b4",
-      "completed": false
+      "completed": true
     }
   ]
 }

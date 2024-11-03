@@ -7,12 +7,16 @@ async function fetchTasks(url) {
         if (!response.ok) throw new Error("Le fichier n'a pas pu être trouvé");
 
         const data = await response.json();
-        tasks = data.tasks || [];
+        tasks = data.tasks.map(task => ({
+            ...task,
+            completed: task.completed || false // Assurez-vous que completed est toujours initialisé
+        })) || [];
         console.log("Tâches chargées :", tasks);
     } catch (error) {
         console.error("Erreur lors de la récupération :", error);
     }
 }
+
 
 // Fonction pour initialiser l'événement de clic sur le logo
 function initializeLogo() {
@@ -203,7 +207,7 @@ function listTasks() {
             data.tasks.forEach(task => {
                 const taskDiv = document.createElement("div");
                 taskDiv.className = "task";
-                taskDiv.style.backgroundColor = task.color; // Appliquer la couleur de fond
+                taskDiv.style.backgroundColor = task.color;
 
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
@@ -211,8 +215,14 @@ function listTasks() {
                 checkbox.className = "taskCheckbox";
                 checkbox.addEventListener("change", () => {
                     task.completed = checkbox.checked; // Mettre à jour l'état de la tâche
-                    toggleTaskCompletion(task); // Fonction à définir pour gérer la logique de complétion
+                    toggleTaskCompletion(task); // Appeler la fonction pour mettre à jour l'état au serveur
                 });
+
+                const label = document.createElement("label");
+                label.textContent = "Tâche terminée";
+
+                taskDiv.appendChild(checkbox);
+                taskDiv.appendChild(label); 
 
                 const taskTitle = document.createElement("h3");
                 taskTitle.textContent = task.title;
@@ -222,7 +232,7 @@ function listTasks() {
 
                 const deleteButton = document.createElement("button");
                 deleteButton.textContent = "Supprimer";
-                deleteButton.addEventListener("click", () => deleteTask(task)); // Appeler la fonction pour supprimer
+                deleteButton.addEventListener("click", () => deleteTask(task));
 
                 const editButton = document.createElement("button");
                 editButton.textContent = "Modifier";
@@ -240,6 +250,7 @@ function listTasks() {
             console.error("Erreur lors de la récupération des tâches :", error);
         });
 }
+
 
 
 // Fonction pour afficher le formulaire de modification d'une tâche
@@ -322,7 +333,7 @@ function updateTask(oldTitle, updatedTask) {
 
 function toggleTaskCompletion(task) {
     fetch('http://localhost:3001/update-task', {
-        method: 'PUT', // Utilisation de PUT pour mettre à jour
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: task.title, completed: task.completed })
     })
@@ -339,6 +350,95 @@ function toggleTaskCompletion(task) {
         console.error("Erreur lors de la mise à jour :", error);
     });
 }
+
+function listTasks() {
+    const contentDiv = document.getElementById("content");
+    contentDiv.innerHTML = ""; // Vider le contenu précédent
+
+    // Créer un sélecteur pour le filtrage
+    const filterSelect = document.createElement("select");
+    filterSelect.id = "filterSelect";
+
+    const options = [
+        { value: "", text: "Tout afficher" },
+        { value: "completed", text: "Tâches terminées" },
+        { value: "incomplete", text: "Tâches non terminées" }
+    ];
+
+    options.forEach(option => {
+        const opt = document.createElement("option");
+        opt.value = option.value;
+        opt.textContent = option.text;
+        filterSelect.appendChild(opt);
+    });
+
+    // Ajouter un événement pour filtrer les tâches
+    filterSelect.addEventListener("change", () => {
+        const filterValue = filterSelect.value;
+        const taskDivs = contentDiv.querySelectorAll(".task");
+        taskDivs.forEach(taskDiv => {
+            const checkbox = taskDiv.querySelector(".taskCheckbox");
+            if (filterValue === "" || (filterValue === "completed" && checkbox.checked) || (filterValue === "incomplete" && !checkbox.checked)) {
+                taskDiv.style.display = "block";
+            } else {
+                taskDiv.style.display = "none";
+            }
+        });
+    });
+
+    // Ajouter le sélecteur de filtre au contenu
+    contentDiv.appendChild(filterSelect);
+
+    fetch('task.json') 
+        .then(response => response.json())
+        .then(data => {
+            data.tasks.forEach(task => {
+                const taskDiv = document.createElement("div");
+                taskDiv.className = "task";
+                taskDiv.style.backgroundColor = task.color;
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = task.completed; // Vérifier si la tâche est terminée
+                checkbox.className = "taskCheckbox";
+                checkbox.addEventListener("change", () => {
+                    task.completed = checkbox.checked; // Mettre à jour l'état de la tâche
+                    toggleTaskCompletion(task); // Appeler la fonction pour mettre à jour l'état au serveur
+                });
+
+                const label = document.createElement("label");
+                label.textContent = "Tâche terminée";
+
+                taskDiv.appendChild(checkbox);
+                taskDiv.appendChild(label); 
+
+                const taskTitle = document.createElement("h3");
+                taskTitle.textContent = task.title;
+
+                const taskDetails = document.createElement("p");
+                taskDetails.textContent = `Échéance: ${task.dueDate} ${task.dueTime} | Urgent: ${task.urgent ? 'Oui' : 'Non'}`;
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Supprimer";
+                deleteButton.addEventListener("click", () => deleteTask(task));
+
+                const editButton = document.createElement("button");
+                editButton.textContent = "Modifier";
+                editButton.addEventListener("click", () => displayEditTaskForm(task));
+
+                taskDiv.appendChild(checkbox);
+                taskDiv.appendChild(taskTitle);
+                taskDiv.appendChild(taskDetails);
+                taskDiv.appendChild(deleteButton);
+                taskDiv.appendChild(editButton);
+                contentDiv.appendChild(taskDiv);
+            });
+        })
+        .catch(error => {
+            console.error("Erreur lors de la récupération des tâches :", error);
+        });
+}
+
 
 // Appel de la fonction pour initialiser
 initializeLogo();
