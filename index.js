@@ -330,7 +330,7 @@ function updateTask(oldTitle, updatedTask) {
         console.error("Erreur lors de la mise à jour :", error);
     });
 }
-
+//fonction pour enregistrer une tâche comme terminer 
 function toggleTaskCompletion(task) {
     fetch('http://localhost:3001/update-task', {
         method: 'PUT',
@@ -438,8 +438,119 @@ function listTasks() {
             console.error("Erreur lors de la récupération des tâches :", error);
         });
 }
+//fonction pour le css
+function addStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #28373F;
+            text-align: center;
+            margin-bottom: 10px;
+            transition: color 0.5s ease;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 1em;
+            background-color: #28373F;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 8px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #46606e;
+        }
+
+        .task {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .task:hover {
+            transform: scale(1.02);
+        }
+
+        .task h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        .task p {
+            margin: 5px 0;
+        }
+
+        .taskCheckbox {
+            margin-right: 8px;
+        }
+
+        label {
+            background-color: #64899c;
+            color: #ffffff; 
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        select, input[type="text"], input[type="email"], input[type="password"], textarea {
+            margin-bottom: 10px;
+            display: block;
+            width: 100%;
+            padding: 8px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #ffffff; 
+            color: #333; 
+        }
+
+        form input[type="submit"] {
+            width: auto;
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #28373F; 
+            color: #ffffff; 
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+
 
 
 // Appel de la fonction pour initialiser
-initializeLogo();
-fetchTasks('task.json'); 
+
+document.addEventListener("DOMContentLoaded", () => {
+    addStyles();
+    fetchTasks("task.json");
+    initializeLogo();
+});
