@@ -1,21 +1,3 @@
 {
-  "tasks": [
-    {
-      "title": "test cb",
-      "dueDate": "1111-11-11",
-      "dueTime": "11:11",
-      "urgent": false,
-      "description": "lire",
-      "color": "#ecb1b1"
-    },
-    {
-      "title": "Recuperer cle",
-      "dueDate": "2222-02-22",
-      "dueTime": "22:22",
-      "urgent": false,
-      "description": "JSP",
-      "color": "#e14141",
-      "completed": false
-    }
-  ]
+  "tasks": []
 }

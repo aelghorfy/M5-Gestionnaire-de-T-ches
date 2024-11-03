@@ -7,7 +7,7 @@ async function fetchTasks(url) {
         if (!response.ok) throw new Error("Le fichier n'a pas pu être trouvé");
 
         const data = await response.json();
-        tasks = data.tasks || []; // Assigner les tâches récupérées
+        tasks = data.tasks || [];
         console.log("Tâches chargées :", tasks);
     } catch (error) {
         console.error("Erreur lors de la récupération :", error);
@@ -52,14 +52,14 @@ function showMenu() {
 // Fonction pour charger dynamiquement le formulaire et les tâches
 function loadPage(pageId) {
     const contentDiv = document.getElementById("content");
-    contentDiv.innerHTML = ""; // Effacer le contenu précédent
+    contentDiv.innerHTML = ""; 
 
     switch (pageId) {
         case "btn1":
-            displayTaskForm(); // Afficher le formulaire pour ajouter des tâches
+            displayTaskForm();
             break;
         case "btn2":
-            listTasks(); // Afficher toutes les tâches
+            listTasks();
             break;
     }
 }
@@ -107,7 +107,7 @@ function displayTaskForm() {
             urgent: document.getElementById("urgent").checked,
             description: document.getElementById("description").value,
             color: document.getElementById("color").value,
-            completed: false // Ajouter un statut de complétion
+            completed: false 
         });
     });
 
@@ -116,7 +116,6 @@ function displayTaskForm() {
 
 // Fonction pour soumettre une nouvelle tâche au serveur
 function submitTask(task) {
-    console.log("Soumission de la tâche au serveur :", task);
     fetch('http://localhost:3001/ajouter-task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,24 +123,22 @@ function submitTask(task) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`La réponse du réseau n'est pas correcte : ${response.statusText}`);
+            throw new Error(`Erreur : ${response.statusText}`);
         }
-        return response.text(); // À modifier si l'API répond avec du JSON
+        return response.text();
     })
     .then(data => {
-        console.log("Réponse du serveur :", data);
         alert(data);
         document.getElementById("taskForm").reset();
-        addTaskToDOM(task); // Ajouter la tâche à l'interface
+        tasks.push(task); 
+        addTaskToDOM(task); 
     })
     .catch(error => {
         console.error("Erreur lors de la soumission de la tâche :", error);
-        alert("Erreur lors de l'ajout de la tâche : " + error.message);
     });
 }
 
-// Fonction pour afficher chaque tâche dans la liste
-// Fonction pour afficher chaque tâche dans la liste
+// Fonction pour ajouter la tâche à l'interface avec le bouton "Supprimer"
 function addTaskToDOM(task) {
     const contentDiv = document.getElementById("content");
     let taskList = document.getElementById("taskList");
@@ -155,122 +152,60 @@ function addTaskToDOM(task) {
     const taskDiv = document.createElement("div");
     taskDiv.className = "task";
     taskDiv.style.backgroundColor = task.color;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Supprimer";
+    deleteButton.addEventListener("click", () => deleteTask(task));
+
     taskDiv.innerHTML = `
         <input type="checkbox" class="taskCheckbox" ${task.completed ? 'checked' : ''} onchange="toggleTaskCompletion(${tasks.indexOf(task)})">
-        <label>Tâche terminée</label> <!-- Ajouter une étiquette ici -->
+        <label>Tâche terminée</label>
         <h3>${task.title}</h3>
         <p>Description : ${task.description}</p>
         <p>Date d'échéance : ${task.dueDate} à ${task.dueTime}</p>
         <p style="color: ${task.urgent ? 'red' : 'black'};">Urgent : ${task.urgent ? 'Oui' : 'Non'}</p>
     `;
+
+    taskDiv.appendChild(deleteButton);
     taskList.appendChild(taskDiv);
 }
 
+// Fonction pour supprimer une tâche
+function deleteTask(task) {
+    const taskIndex = tasks.indexOf(task);
+    if (taskIndex > -1) {
+        tasks.splice(taskIndex, 1); 
+        fetch(`http://localhost:3001/supprimer-task`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: task.title })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Erreur lors de la suppression de la tâche");
+            }
+            listTasks(); 
+        })
+        .catch(error => {
+            console.error("Erreur lors de la suppression :", error);
+        });
+    }
+}
 
-// Fonction pour afficher les tâches existantes
+// Fonction pour afficher toutes les tâches
 function listTasks() {
     const contentDiv = document.getElementById("content");
-    contentDiv.innerHTML = ""; // Effacer le contenu existant
+    contentDiv.innerHTML = ""; // Vider le contenu précédent
 
     const taskList = document.createElement("div");
     taskList.id = "taskList";
 
-    // Vérifier s'il y a des tâches à afficher
-    if (tasks.length === 0) {
-        const noTasksMessage = document.createElement("p");
-        noTasksMessage.textContent = "Aucune tâche à afficher.";
-        contentDiv.appendChild(noTasksMessage);
-    } else {
-        // Parcourir le tableau des tâches et ajouter chaque tâche à l'interface
-        tasks.forEach(task => addTaskToDOM(task));
-        
-        // Ajouter le select pour filtrer les tâches par statut
-        const statusSelect = document.createElement("select");
-        statusSelect.id = "statusSelect";
-        statusSelect.addEventListener("change", () => {
-            const selectedValue = statusSelect.value;
-            filterTasksByStatus(selectedValue);
-        });
+    // Afficher toutes les tâches
+    tasks.forEach(task => addTaskToDOM(task));
 
-        const statusOptions = [
-            { value: "", text: "Tous" },
-            { value: "active", text: "Actives" },
-            { value: "completed", text: "Terminées" },
-        ];
-
-        statusOptions.forEach(optionInfo => {
-            const option = document.createElement("option");
-            option.value = optionInfo.value;
-            option.textContent = optionInfo.text;
-            statusSelect.appendChild(option);
-        });
-
-        contentDiv.appendChild(statusSelect); // Ajouter le select pour le statut
-
-        // Ajouter le select pour filtrer par date d'échéance
-        const dateSelect = document.createElement("select");
-        dateSelect.id = "dateSelect";
-        dateSelect.addEventListener("change", () => {
-            const selectedValue = dateSelect.value;
-            filterTasksByDueDate(selectedValue);
-        });
-
-        const dateOptions = [
-            { value: "", text: "Toutes les dates" },
-            { value: "overdue", text: "Échéances passées" },
-            { value: "upcoming", text: "À venir" },
-        ];
-
-        dateOptions.forEach(optionInfo => {
-            const option = document.createElement("option");
-            option.value = optionInfo.value;
-            option.textContent = optionInfo.text;
-            dateSelect.appendChild(option);
-        });
-
-        contentDiv.appendChild(dateSelect); // Ajouter le select pour la date
-    }
-
-    contentDiv.appendChild(taskList); // Ajouter la liste des tâches à contentDiv
-}
-
-// Fonction pour filtrer les tâches par statut
-function filterTasksByStatus(status) {
-    const taskList = document.getElementById("taskList");
-    taskList.innerHTML = ""; // Effacer la liste actuelle
-
-    const filteredTasks = tasks.filter(task => {
-        if (status === "") return true; // Tous les statuts
-        if (status === "active") return !task.completed; // Tâches actives
-        if (status === "completed") return task.completed; // Tâches terminées
-    });
-
-    filteredTasks.forEach(task => addTaskToDOM(task)); // Afficher les tâches filtrées
-}
-
-// Fonction pour filtrer les tâches par date d'échéance
-function filterTasksByDueDate(criteria) {
-    const taskList = document.getElementById("taskList");
-    taskList.innerHTML = ""; // Effacer la liste actuelle
-
-    const today = new Date();
-
-    const filteredTasks = tasks.filter(task => {
-        const dueDate = new Date(task.dueDate);
-        if (criteria === "") return true; // Toutes les dates
-        if (criteria === "overdue") return dueDate < today; // Échéances passées
-        if (criteria === "upcoming") return dueDate >= today; // À venir
-    });
-
-    filteredTasks.forEach(task => addTaskToDOM(task)); // Afficher les tâches filtrées
-}
-
-// Fonction pour basculer le statut de complétion d'une tâche
-function toggleTaskCompletion(taskIndex) {
-    tasks[taskIndex].completed = !tasks[taskIndex].completed; // Inverser le statut de la tâche
-    console.log("Statut de la tâche modifié :", tasks[taskIndex]);
+    contentDiv.appendChild(taskList);
 }
 
 // Initialisation
 initializeLogo();
-fetchTasks('task.json'); // Récupérer les tâches depuis le fichier JSON
+fetchTasks('task.json'); 
