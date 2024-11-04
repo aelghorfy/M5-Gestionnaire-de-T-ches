@@ -197,7 +197,7 @@ function deleteTask(task) {
 }
 
 // Fonction pour lister les tâches
-function listTasks() {
+/* function listTasks() {
     const contentDiv = document.getElementById("content");
     contentDiv.innerHTML = ""; // Vider le contenu précédent
 
@@ -249,7 +249,7 @@ function listTasks() {
         .catch(error => {
             console.error("Erreur lors de la récupération des tâches :", error);
         });
-}
+} */
 
 
 
